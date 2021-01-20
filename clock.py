@@ -13,7 +13,7 @@ class clock:
 
         self.update_time()
 
-        
+
     def update_time(self):
         current_time = dt.strftime(dt.now(), "%H:%M")
         self.eink.rotatedText(current_time, 90, 20, self.eink.xend/2, 20/2+10/2, fill=0)

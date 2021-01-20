@@ -1,4 +1,4 @@
-# Screen Size (176, 264) 
+# Screen Size (176, 264)
 
 import epd2in7
 from PIL import Image
@@ -21,7 +21,7 @@ class eink:
         self.draw = ImageDraw.Draw(self.image)
         self.epd = epd2in7.EPD()
         self.epd.init()
-        
+
         # Define constants
         self.axisend = 5
         self.axisoffset = 20
@@ -35,8 +35,8 @@ class eink:
         self.axisthickness = 2
         self.roundToBase = [5, 5]
         self.page = 0
-        self.maxPages = 100    
-    
+        self.maxPages = 100
+
         # Define flags
         self.dataPlotted = False
 
@@ -47,14 +47,14 @@ class eink:
         '''
         self.epd.display_frame(self.epd.get_frame_buffer(self.image))
 
-    
+
     def fontGrab(self, fontSize):
         '''
         Returns a font object of the given fontSize
         INPUTS:
             fontSize: the size of the font to return
         '''
-        return ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', fontSize)        
+        return ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', fontSize)
 
 
     def rightText(self, string, fontSize, x, y):
@@ -179,14 +179,14 @@ class eink:
         RETURN:
             returns the rounded value
         '''
-    
+
         if(up):
             return math.ceil(float(x)/float(base))*base
         elif(down):
             return math.floor(float(x)/float(base))*base
         else:
             return round(float(x)/float(base))*base
-    
+
 
     def graphSetup(self, xdata, ydata):
         '''
@@ -195,12 +195,12 @@ class eink:
             xdata: list of the x-coordinates (must be same length as ydata)
             ydata: list of the y-coordinates (must be same length as xdata)
         '''
-        
+
         # Check if the x list and y list are the same length
         if(len(xdata) != len(ydata)):
             logger.error("ERROR: Data length mismatch")
             sys.exit()
-    
+
         # Find the length of the x and y axes on the graph
         self.xlength = self.xzero-self.axisend
         self.ylength = self.yzero-self.axisend
@@ -226,10 +226,10 @@ class eink:
         self.yoffset = min(xdata)
         if(self.yoffset < max(xdata)/10):
             self.yoffset = 0
-    
+
         # Log found data
         logger.debug('X-offset: ' + str(self.xoffset))
-        logger.debug('Y-offset: ' + str(self.yoffset))        
+        logger.debug('Y-offset: ' + str(self.yoffset))
         logger.debug('X-scale factor: ' + str(self.xscale))
         logger.debug('Y-scale factor: ' + str(self.yscale))
 
@@ -246,11 +246,11 @@ class eink:
             grid: boolean to say if grid is horizontal ('horizontal') or both ('full')  (default off)
             markers: boolean to say if the markers are placed (default placed)
         '''
-        
+
         # Setup graphing parameters
         if(markers):
             self.graphSetup(xdata, ydata)
-    
+
         # For each point in the dataset, create a rectangle to show the point
         for i in range(0, len(xdata)):
             self.centerSquare(size, self.xzero-((ydata[i]-self.xoffset)*self.xscale), self.yzero-((xdata[i]-self.yoffset)*self.yscale))
@@ -280,16 +280,16 @@ class eink:
         self.dataperY = self.roundTo(((max(ydata) - min(ydata))/6), self.roundToBase[1], up=True)
         logger.debug('Data per mark X-axis: ' + str(self.dataperX))
         logger.debug('Data per mark Y-axis: ' + str(self.dataperY))
-        
+
         # Find the marker points
-        self.xmarkers = [] 
+        self.xmarkers = []
         self.ymarkers = []
 
         for i in range(0, 8):
             self.xmarkers.append(self.roundTo(min(xdata), self.roundToBase[0])+(i*self.dataperX))
         for i in range(0, 5):
             self.ymarkers.append(self.roundTo(min(ydata), self.roundToBase[1])+(i*self.dataperY))
-            
+
         logger.debug('X Markers: ' + str(self.xmarkers))
         logger.debug('Y Markers: ' + str(self.ymarkers))
 
@@ -301,7 +301,7 @@ class eink:
         elif(len(str(int(max(self.ymarkers)))) > 3):
             self.yaxisoffset = 35
             self.yzero = self.yend-self.axisoffset
-    
+
 
     def linePlot(self, xdata, ydata, points=False, grid='off'):
         '''
@@ -313,18 +313,18 @@ class eink:
         '''
         # Setup graphing parameters
         self.graphSetup(xdata, ydata)
-    
+
         # If points are needed place those on image
         if(points):
             self.scatter(2, xdata, ydata, markers=False)
-        
+
         # Plot the lines between each point
         for i in range(0, len(xdata)-1):
             self.firstX_tmp = self.xzero-((ydata[i]-self.xoffset)*self.xscale)
             self.firstY_tmp = self.yzero-((xdata[i]-self.yoffset)*self.yscale)
             self.secondX_tmp = self.xzero-((ydata[i+1]-self.xoffset)*self.xscale)
             self.secondY_tmp = self.yzero-((xdata[i+1]-self.yoffset)*self.yscale)
-            self.draw.line((self.firstX_tmp, self.firstY_tmp, self.secondX_tmp, self.secondY_tmp), fill=0)    
+            self.draw.line((self.firstX_tmp, self.firstY_tmp, self.secondX_tmp, self.secondY_tmp), fill=0)
 
         self.majorDelimiters(xdata, ydata, grid)
 
@@ -340,7 +340,7 @@ class eink:
         '''
         # Setup graphing parameters
         self.graphSetup(xdata, ydata)
-        
+
         # Get bar graph specific parameters
         if(len(xdata) > self.xlength/2):
             logger.warning("WARNING: Too many data points for given resolution")
@@ -364,7 +364,7 @@ class eink:
             self.x2_tmp = self.xzero
             self.y2_tmp = self.yzero-((xdata[i]-self.yoffset)*self.yscale)-(self.barWidth/2)
             self.draw.rectangle((self.x1_tmp, self.y1_tmp, self.x2_tmp, self.y2_tmp), fill=0)
-        
+
         self.majorDelimiters(xdata, ydata, grid)
 
 
@@ -426,11 +426,11 @@ class eink:
         # Fill the linewise data array
         for word in self.splitString:
             if(self.font_tmp.getsize(self.string_tmp + word + ' ')[0] < 176):
-                self.string_tmp = self.string_tmp + word + ' ' 
+                self.string_tmp = self.string_tmp + word + ' '
             else:
                 self.hold_tmp.append(self.string_tmp)
                 self.string_tmp = word + ' '
-    
+
         self.hold_tmp.append(self.string_tmp)
 
         #logger.debug('hold: ' + str(self.hold_tmp))
@@ -445,9 +445,9 @@ class eink:
                 self.pageIndex = -1
             self.pageIndex = self.pageIndex + 1
         self.pageHold.append(self.pageBuffer_tmp)
-    
+
         #logger.debug('pages: ' + str(self.pageHold))
-        
+
         # Save total number of pages
         self.maxPages = len(self.pageHold)
         logger.debug('Max pages: ' + str(self.maxPages))
@@ -456,10 +456,10 @@ class eink:
         '''
         Displays the pages on to the screen and displays the UI at bottom
         '''
-        # Start with clean canvas    
+        # Start with clean canvas
         self.image = Image.new('1', (epd2in7.EPD_WIDTH, epd2in7.EPD_HEIGHT), 255)
-        self.draw = ImageDraw.Draw(self.image)        
-        
+        self.draw = ImageDraw.Draw(self.image)
+
         # Grab font
         self.font_tmp = self.fontGrab(self.stringFontSize)
 
@@ -472,7 +472,7 @@ class eink:
         # Grab a font
         self.fontUI_tmp = self.fontGrab(10)
 
-        # Draw the options at the bottom        
+        # Draw the options at the bottom
         self.draw.text((0, self.yend-11), 'Page ' + str(self.page+1) + ' of ' + str(self.maxPages), font=self.fontUI_tmp, fill=0)
 
         self.display()
@@ -492,7 +492,7 @@ class eink:
         self.startPage = self.page
         # Change page number depending on button press
         if(button == 1):
-            self.page = self.page - 1        
+            self.page = self.page - 1
         elif(button == 2):
             pass
         elif(button == 3):
@@ -508,7 +508,7 @@ class eink:
         if(self.page >= self.maxPages):
             self.page = self.maxPages-1
 
-        logger.debug('Current page: ' + str(self.page+1))        
+        logger.debug('Current page: ' + str(self.page+1))
 
         # Display the new page
         if(self.startPage != self.page):
