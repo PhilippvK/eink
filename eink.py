@@ -12,15 +12,18 @@ import sys
 logger = logging.getLogger('mainlog')
 
 class eink:
-    def __init__(self):
+    def __init__(self, fake_screen=False):
         '''
         Initializes a new object with the relevant parameters
         '''
         # Setup the image canvas and the display driver
         self.image = Image.new('1', (epd2in7.EPD_WIDTH, epd2in7.EPD_HEIGHT), 255)
         self.draw = ImageDraw.Draw(self.image)
-        self.epd = epd2in7.EPD()
-        self.epd.init()
+
+        self.fake_screen = fake_screen
+        if not self.fake_screen:
+            self.epd = epd2in7.EPD()
+            self.epd.init()
 
         # Define constants
         self.axisend = 5
@@ -43,9 +46,13 @@ class eink:
 
     def display(self):
         '''
-        Updates the display
+        Updates the display (or displays the image on the Monitor)
         '''
-        self.epd.display_frame(self.epd.get_frame_buffer(self.image))
+        if self.fake_screen:
+            print("Exported: {}".format(self.image))
+            self.image.save("epaper.jpg")
+        else:
+            self.epd.display_frame(self.epd.get_frame_buffer(self.image))
 
 
     def fontGrab(self, fontSize):
